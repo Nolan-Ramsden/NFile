@@ -5,17 +5,18 @@ namespace NFile.Memory
     class MemoryFileHandle : IFileHandle
     {
         protected MemoryFile File { get; }
-        protected string Buffer { get; set; }
+        protected bool BeenWritten { get; set; } = false;
+        protected string Buffer { get; set; } = string.Empty;
 
         public MemoryFileHandle(MemoryFile file)
         {
             this.File = file;
-            this.Buffer = file.Contents;
         }
 
         public void Write(string txt)
         {
             this.Buffer = txt;
+            this.BeenWritten = true;
         }
 
         public void Append(string txt)
@@ -25,17 +26,26 @@ namespace NFile.Memory
 
         public void Clear()
         {
-            this.Buffer = string.Empty;
+            this.Write(string.Empty);
         }
 
         public Task<string> Read()
         {
-            return Task.FromResult(this.Buffer);
+            return Task.FromResult(this.File.Contents);
         }
 
         public Task Flush()
         {
-            this.File.Contents = Buffer;
+            if (this.BeenWritten)
+            {
+                this.File.Contents = Buffer;
+            }
+            else
+            {
+                this.File.Contents += Buffer;
+            }
+            this.BeenWritten = false;
+            this.Buffer = string.Empty;
             return Task.CompletedTask;
         }
 

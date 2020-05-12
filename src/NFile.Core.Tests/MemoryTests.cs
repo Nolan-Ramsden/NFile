@@ -13,7 +13,7 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task CreateDirectory()
         {
-            var dir = await this.Fs.GetDirectory(@"test_directory\");
+            var dir = this.Fs.GetDirectory(@"test_directory\");
             Assert.AreEqual("test_directory", dir.Name);
             Assert.AreEqual("test_directory", dir.Path);
 
@@ -32,7 +32,7 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task CreateFile()
         {
-            var file = await this.Fs.GetFile("test_file.txt");
+            var file = this.Fs.GetFile("test_file.txt");
             Assert.AreEqual("test_file.txt", file.Name);
             Assert.AreEqual("test_file.txt", file.Path);
 
@@ -51,22 +51,22 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task CreateFileInSubdir()
         {
-            var dir1 = await this.Fs.GetDirectory("dir1");
+            var dir1 = this.Fs.GetDirectory("dir1");
             await dir1.Create();
 
-            var dir2 = await dir1.GetDirectory("dir2");
+            var dir2 = dir1.GetDirectory("dir2");
             Assert.AreEqual(@"dir1\dir2", dir2.Path);
             await dir2.Create();
 
-            var file = await dir2.GetFile("test_file.txt");
+            var file = dir2.GetFile("test_file.txt");
             Assert.AreEqual(@"dir1\dir2\test_file.txt", file.Path);
             await file.Create();
 
-            var dir2FromRoot = await this.Fs.GetDirectory(@"dir1\dir2");
+            var dir2FromRoot = this.Fs.GetDirectory(@"dir1\dir2");
             var dir2Exists = await dir2FromRoot.Exists();
             Assert.IsTrue(dir2Exists);
 
-            var fileFromRoot = await this.Fs.GetFile(@"dir1\dir2\test_file.txt");
+            var fileFromRoot = this.Fs.GetFile(@"dir1\dir2\test_file.txt");
             var fileExists = await fileFromRoot.Exists();
             Assert.IsTrue(fileExists);
         }
@@ -74,13 +74,13 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task DeleteDirectoryWithItems()
         {
-            var dir1 = await this.Fs.GetDirectory("dir1");
+            var dir1 = this.Fs.GetDirectory("dir1");
             await dir1.Create();
 
-            var dir2 = await dir1.GetDirectory("dir2");
+            var dir2 = dir1.GetDirectory("dir2");
             await dir2.Create();
 
-            var file = await dir2.GetFile("test_file.txt");
+            var file = dir2.GetFile("test_file.txt");
             await file.Create();
 
             await dir2.Delete();
@@ -98,16 +98,16 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task EnumerateChildren()
         {
-            var dir1 = await this.Fs.GetDirectory("dir1");
+            var dir1 = this.Fs.GetDirectory("dir1");
             await dir1.Create();
 
-            var dir2 = await dir1.GetDirectory("dir2");
+            var dir2 = dir1.GetDirectory("dir2");
             await dir2.Create();
 
-            var file1 = await dir2.GetFile("file1.txt");
+            var file1 = dir2.GetFile("file1.txt");
             await file1.Create();
 
-            var file2 = await dir2.GetFile("file2.txt");
+            var file2 = dir2.GetFile("file2.txt");
             await file2.Create();
 
             var dir1Children = await dir1.GetChildren();
@@ -115,6 +115,36 @@ namespace NFile.Core.Tests
 
             var dir2Children = await dir2.GetChildren();
             Assert.AreEqual(2, dir2Children.Count());
+        }
+
+        [TestMethod]
+        public async Task WriteReadFile()
+        {
+            var file = this.Fs.GetFile("test_file.txt");
+            await file.Create();
+
+            using (var handle = file.Open())
+            {
+                var contents = await handle.Read();
+                Assert.AreEqual(string.Empty, contents);
+
+                handle.Write("test_1 ");
+                handle.Append("test_2 ");
+                handle.Write("test_3 ");
+
+                contents = await handle.Read();
+                Assert.AreEqual(string.Empty, contents);
+
+                await handle.Flush();
+                contents = await handle.Read();
+                Assert.AreEqual("test_3 ", contents);
+
+                handle.Append("test_2 ");
+
+                await handle.Flush();
+                contents = await handle.Read();
+                Assert.AreEqual("test_3 test_2 ", contents);
+            }
         }
     }
 }

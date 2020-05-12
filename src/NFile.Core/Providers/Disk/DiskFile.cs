@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace NFile.Disk
@@ -8,7 +7,7 @@ namespace NFile.Disk
     {
         public override FileSystemItemType ItemType => FileSystemItemType.File;
 
-        private FileInfo File { get; }
+        protected FileInfo File { get; }
 
         public DiskFile(DirectoryInfo root, FileInfo file) : base(root, file)
         {
@@ -27,6 +26,11 @@ namespace NFile.Disk
             this.File.Refresh();
             this.File.Delete();
             return Task.CompletedTask;
+        }
+
+        public IFileHandle Open()
+        {
+            return new DiskFileHandle(this.File);
         }
     }
 }

@@ -16,12 +16,12 @@ namespace NFile.Memory
             this.Root.Create().Wait();
         }
 
-        public Task<IDirectory> GetDirectory(string path)
+        public IDirectory GetDirectory(string path)
         {
             return this.Root.GetDirectory(path);
         }
 
-        public Task<IFile> GetFile(string path)
+        public IFile GetFile(string path)
         {
             return this.Root.GetFile(path);
         }

@@ -9,23 +9,23 @@ namespace NFile.Disk
 
         public string Provider => ProviderName;
 
-        private DirectoryInfo Root { get; }
+        protected DirectoryInfo Root { get; }
 
         public DiskFileSystem(DirectoryInfo root)
         {
             this.Root = root;
         }
 
-        public Task<IDirectory> GetDirectory(string path)
+        public IDirectory GetDirectory(string path)
         {
             var directory = new DirectoryInfo(Path.Combine(this.Root.FullName, path));
-            return Task.FromResult<IDirectory>(new DiskDirectory(this.Root, directory));
+            return new DiskDirectory(this.Root, directory);
         }
 
-        public Task<IFile> GetFile(string path)
+        public IFile GetFile(string path)
         {
             var file = new FileInfo(Path.Combine(this.Root.FullName, path));
-            return Task.FromResult<IFile>(new DiskFile(this.Root, file));
+            return new DiskFile(this.Root, file);
         }
     }
 }

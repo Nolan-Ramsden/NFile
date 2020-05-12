@@ -4,6 +4,6 @@ namespace NFile
 {
     public interface IFile : IFileSystemItem
     {
-        Task<IFileHandle> Open();
+        IFileHandle Open();
     }
 }

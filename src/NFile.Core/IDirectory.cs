@@ -5,9 +5,9 @@ namespace NFile
 {
     public interface IDirectory : IFileSystemItem
     {
-        Task<IFile> GetFile(string relativePath);
+        IFile GetFile(string relativePath);
 
-        Task<IDirectory> GetDirectory(string relativePath);
+        IDirectory GetDirectory(string relativePath);
 
         Task<IEnumerable<IFileSystemItem>> GetChildren();
     }

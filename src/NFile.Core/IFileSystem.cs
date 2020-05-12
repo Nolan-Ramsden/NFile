@@ -6,8 +6,8 @@ namespace NFile
     {
         string Provider { get; }
 
-        Task<IFile> GetFile(string path);
+        IFile GetFile(string path);
 
-        Task<IDirectory> GetDirectory(string path);
+        IDirectory GetDirectory(string path);
     }
 }

@@ -12,9 +12,9 @@ namespace NFile.Memory
         {
         }
 
-        public Task<IFileHandle> Open()
+        public IFileHandle Open()
         {
-            return Task.FromResult<IFileHandle>(new MemoryFileHandle(this));
+            return new MemoryFileHandle(this);
         }
     }
 }

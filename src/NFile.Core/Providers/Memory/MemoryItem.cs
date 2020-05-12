@@ -11,8 +11,8 @@ namespace NFile.Memory
         public string Path => this.GetPath();
         public string Provider => MemoryFileSystem.ProviderName;
 
-        private bool Created { get; set; }
-        private MemoryDirectory Parent { get; }
+        protected bool Created { get; set; }
+        protected MemoryDirectory Parent { get; }
 
         public MemoryItem(MemoryDirectory parent, string name)
         {

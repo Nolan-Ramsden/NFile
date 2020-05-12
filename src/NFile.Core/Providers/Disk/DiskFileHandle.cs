@@ -1,13 +1,12 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace NFile.Providers.Disk
+namespace NFile.Disk
 {
     class DiskFileHandle : IFileHandle
     {
         protected FileInfo File { get; set; }
-        protected bool BufferStale { get; set; } = false;
-        protected bool AppendOnWrite { get; set; } = false;
+        protected bool BeenWritten { get; set; } = false;
         protected string Buffer { get; set; } = string.Empty;
 
         public DiskFileHandle(FileInfo file)
@@ -18,7 +17,12 @@ namespace NFile.Providers.Disk
         public void Append(string txt)
         {
             this.Buffer += txt;
-            this.AppendOnWrite = true;
+        }
+
+        public void Write(string txt)
+        {
+            this.Buffer = txt;
+            this.BeenWritten = true;
         }
 
         public Task<string> Read()
@@ -28,28 +32,21 @@ namespace NFile.Providers.Disk
             );
         }
 
-        public void Write(string txt)
-        {
-            this.Buffer = txt;
-            this.AppendOnWrite = false;
-        }
-
         public void Clear()
         {
-            this.Buffer = string.Empty;
-            this.AppendOnWrite = false;
+            this.Write(string.Empty);
         }
 
         public async Task Flush()
         {
-            if (!this.AppendOnWrite)
+            if (this.BeenWritten)
             {
                 await System.IO.File.WriteAllTextAsync(
                     path: this.File.FullName, 
                     contents: this.Buffer
                 );
             }
-            if (this.Buffer != string.Empty)
+            else if (this.Buffer != string.Empty)
             {
                 await System.IO.File.AppendAllTextAsync(
                     path: this.File.FullName,
@@ -57,7 +54,7 @@ namespace NFile.Providers.Disk
                 );
             }
             this.Buffer = string.Empty;
-            this.AppendOnWrite = false;
+            this.BeenWritten = false;
         }
 
         public void Dispose()

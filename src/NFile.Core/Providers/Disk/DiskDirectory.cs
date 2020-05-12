@@ -9,7 +9,7 @@ namespace NFile.Disk
     {
         public override FileSystemItemType ItemType => FileSystemItemType.Directory;
 
-        private DirectoryInfo Directory { get; }
+        protected DirectoryInfo Directory { get; }
 
         public DiskDirectory(DirectoryInfo root, DirectoryInfo directory) : base(root, directory)
         {
@@ -39,18 +39,18 @@ namespace NFile.Disk
             return Task.FromResult<IEnumerable<IFileSystemItem>>(children);
         }
 
-        public Task<IDirectory> GetDirectory(string relativePath)
+        public IDirectory GetDirectory(string relativePath)
         {
             var fullPath = System.IO.Path.Combine(this.Directory.FullName, relativePath);
             var directory = new DirectoryInfo(fullPath);
-            return Task.FromResult< IDirectory>(new DiskDirectory(this.Root, directory));
+            return new DiskDirectory(this.Root, directory);
         }
 
-        public Task<IFile> GetFile(string relativePath)
+        public IFile GetFile(string relativePath)
         {
             var fullPath = System.IO.Path.Combine(this.Directory.FullName, relativePath);
             var file = new FileInfo(fullPath);
-            return Task.FromResult<IFile>(new DiskFile(this.Root, file));
+            return new DiskFile(this.Root, file);
         }
     }
 }
