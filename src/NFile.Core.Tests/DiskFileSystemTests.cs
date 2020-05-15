@@ -1,14 +1,17 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NFile.Memory;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NFile.Disk;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace NFile.Core.Tests
 {
     [TestClass]
-    public class MemoryTests
+    public class DiskFileSystemTests
     {
-        MemoryFileSystem Fs { get; } = new MemoryFileSystem();
+        static string TestRoot { get; } = @"C:\Users\nolan\Downloads\scratch";
+
+        DiskFileSystem Fs { get; } = new DiskFileSystem(new DiskConfiguration() { Root = TestRoot });
 
         [TestMethod]
         public async Task CreateDirectory()
@@ -144,6 +147,20 @@ namespace NFile.Core.Tests
                 await handle.Flush();
                 contents = await handle.Read();
                 Assert.AreEqual("test_3 test_2 ", contents);
+            }
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            var tr = new DirectoryInfo(TestRoot);
+            foreach (FileInfo file in tr.GetFiles())
+            {
+                file.Delete();
+            }
+            foreach (DirectoryInfo dir in tr.GetDirectories())
+            {
+                dir.Delete(true);
             }
         }
     }

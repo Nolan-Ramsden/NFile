@@ -12,15 +12,15 @@ namespace NFile
             return services.AddTransient<IFileSystemProvider, FileSystemProvider>();
         }
 
-        public static IServiceCollection AddMemoryFileSystem(this IServiceCollection services)
+        public static IServiceCollection AddMemoryFileSystem(this IServiceCollection services, MemoryConfiguration config)
         {
-            return services.AddSingleton<IFileSystem, MemoryFileSystem>();
+            return services.AddSingleton<IFileSystem>(new MemoryFileSystem(config));
         }
 
-        public static IServiceCollection AddDiskFileSystem(this IServiceCollection services, string root)
+        public static IServiceCollection AddDiskFileSystem(this IServiceCollection services, DiskConfiguration config)
         {
             return services.AddTransient<IFileSystem, DiskFileSystem>(
-                (services) => new DiskFileSystem(new DirectoryInfo(root))
+                (services) => new DiskFileSystem(config)
             );
         }
     }

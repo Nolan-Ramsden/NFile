@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 
 namespace NFile.Disk
 {
@@ -11,9 +10,9 @@ namespace NFile.Disk
 
         protected DirectoryInfo Root { get; }
 
-        public DiskFileSystem(DirectoryInfo root)
+        public DiskFileSystem(DiskConfiguration config)
         {
-            this.Root = root;
+            this.Root = new DirectoryInfo(config.Root);
         }
 
         public IDirectory GetDirectory(string path)

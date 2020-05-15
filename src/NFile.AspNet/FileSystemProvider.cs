@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace NFile
 {
-    class FileSystemProvider : IFileSystemProvider
+    public class FileSystemProvider : IFileSystemProvider
     {
-        private IEnumerable<IFileSystem> Providers { get; }
+        protected IEnumerable<IFileSystem> Providers { get; }
 
         public FileSystemProvider(IEnumerable<IFileSystem> providers)
         {

@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NFile.Core.Tests", "NFile.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFile.AspNet", "Nfile.AspNet\NFile.AspNet.csproj", "{89BB2383-5588-4FC0-B260-C13D478255CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFile.AspNet.Tests", "NFile.AspNet.Tests\NFile.AspNet.Tests.csproj", "{EFC866A3-B4E1-41F9-9B0D-15436F427AC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFile.Azure", "NFile.Azure\NFile.Azure.csproj", "{3E28B498-17F3-42BE-97D7-1112687F270C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{89BB2383-5588-4FC0-B260-C13D478255CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89BB2383-5588-4FC0-B260-C13D478255CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89BB2383-5588-4FC0-B260-C13D478255CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFC866A3-B4E1-41F9-9B0D-15436F427AC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC866A3-B4E1-41F9-9B0D-15436F427AC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC866A3-B4E1-41F9-9B0D-15436F427AC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC866A3-B4E1-41F9-9B0D-15436F427AC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E28B498-17F3-42BE-97D7-1112687F270C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E28B498-17F3-42BE-97D7-1112687F270C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E28B498-17F3-42BE-97D7-1112687F270C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E28B498-17F3-42BE-97D7-1112687F270C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

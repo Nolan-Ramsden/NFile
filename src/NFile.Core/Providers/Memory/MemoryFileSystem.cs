@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace NFile.Memory
+﻿namespace NFile.Memory
 {
     public class MemoryFileSystem : IFileSystem
     {
@@ -10,7 +8,7 @@ namespace NFile.Memory
 
         private MemoryDirectory Root { get; }
 
-        public MemoryFileSystem()
+        public MemoryFileSystem(MemoryConfiguration config)
         {
             this.Root = new MemoryDirectory(null, string.Empty);
             this.Root.Create().Wait();
