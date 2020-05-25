@@ -150,6 +150,36 @@ namespace NFile.Core.Tests
             }
         }
 
+        [TestMethod]
+        public async Task IgnoresPlatform()
+        {
+            var dirTrail = this.Fs.GetDirectory("testdir/");
+            await dirTrail.Create();
+            var dirTrailExists = await dirTrail.Exists();
+            Assert.IsTrue(dirTrailExists);
+
+            var dir = this.Fs.GetDirectory("testdir");
+            var dirExists = await dir.Exists();
+            Assert.IsTrue(dirExists);
+
+            var dirTrail2 = this.Fs.GetDirectory(@"testdir\");
+            var dirTrail2Exists = await dirTrail2.Exists();
+            Assert.IsTrue(dirTrail2Exists);
+
+            var dirLead = this.Fs.GetDirectory(@"\testdir");
+            var dirLeadExists = await dirLead.Exists();
+            Assert.IsTrue(dirLeadExists);
+
+            var file = dir.GetFile("test_file.txt");
+            await file.Create();
+            var fileExists = await file.Exists();
+            Assert.IsTrue(fileExists);
+
+            var fileMixed = this.Fs.GetFile(@"/testdir\test_file.txt");
+            var fileMixedExists = await fileMixed.Exists();
+            Assert.IsTrue(fileMixedExists);
+        }
+
         [TestCleanup]
         public void Cleanup()
         {

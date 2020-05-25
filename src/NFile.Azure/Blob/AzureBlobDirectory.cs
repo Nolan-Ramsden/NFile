@@ -1,54 +1,98 @@
 ﻿using Azure.Storage.Blobs;
+using NFile.Util;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace NFile.Azure.Blob
 {
-    class AzureBlobDirectory : IDirectory
+    class AzureBlobDirectory : AzureBlobItem, IDirectory
     {
-        public FileSystemItemType ItemType => FileSystemItemType.Directory;
+        public override FileSystemItemType ItemType => FileSystemItemType.Directory;
 
-        public string Name { get; }
-        public string Path { get; }
-        public string Provider => AzureBlobFileSystem.ProviderName;
+        protected AzureBlobFile ExistanceMarker { get; }
 
-        protected BlobServiceClient Client { get; }
-
-        public AzureBlobDirectory(BlobServiceClient client, string path)
+        public AzureBlobDirectory(BlobServiceClient client, string path) : base(client, path)
         {
-            this.Path = path;
-            this.Client = client;
+            this.ExistanceMarker = new AzureBlobFile(client, PathUtils.Combine(this.Path, ".marker"));
         }
 
-        public Task Create()
+        public override async Task Create()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(this.ContainerPath))
+            {
+                var result = await this.ContainerClient.CreateAsync();
+                var response = result.GetRawResponse();
+                if (response.Status != (int)HttpStatusCode.Created)
+                {
+                    throw new Exception(response.ReasonPhrase);
+                }
+            }
+
+            await this.ExistanceMarker.Create();
         }
 
-        public Task Delete()
+        public override async Task Delete()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(this.ContainerPath))
+            {
+                await this.ContainerClient.DeleteAsync();
+                return;
+            }
+
+            var children = await this.GetChildren();
+            await Task.WhenAll(children.Select(c => c.Delete()));
+            await this.ExistanceMarker.Delete();
         }
 
-        public Task<bool> Exists()
+        public override Task<bool> Exists()
         {
-            throw new NotImplementedException();
+            return this.ExistanceMarker.Exists();
         }
 
-        public Task<IEnumerable<IFileSystemItem>> GetChildren()
+        public async Task<IEnumerable<IFileSystemItem>> GetChildren()
         {
-            throw new NotImplementedException();
+            var azurePath = this.ContainerPath.Replace(PathUtils.Separator, '/');
+            var results = this.ContainerClient.GetBlobsByHierarchyAsync(
+                prefix: azurePath + "/",
+                delimiter: "/"
+            );
+
+            var children = new List<IFileSystemItem>();
+            await foreach(var result in results)
+            {
+                if (result.Prefix == null)
+                {
+                    var fullPath = PathUtils.Combine(this.Container, result.Blob.Name);
+                    var item = new AzureBlobFile(this.Client, fullPath);
+                    if (item.Path != this.ExistanceMarker.Path)
+                    {
+                        children.Add(item);
+                    }
+                }
+                else
+                {
+                    var fullPath = PathUtils.Combine(this.Container, result.Prefix);
+                    var item = new AzureBlobDirectory(this.Client, fullPath);
+                    children.Add(item);
+                }
+            }
+
+            return children;
         }
 
         public IDirectory GetDirectory(string relativePath)
         {
-            throw new NotImplementedException();
+            var fullPath = PathUtils.Combine(this.Path, relativePath);
+            return new AzureBlobDirectory(this.Client, fullPath);
         }
 
         public IFile GetFile(string relativePath)
         {
-            throw new NotImplementedException();
+            var fullPath = PathUtils.Combine(this.Path, relativePath);
+            return new AzureBlobFile(this.Client, fullPath);
         }
     }
 }

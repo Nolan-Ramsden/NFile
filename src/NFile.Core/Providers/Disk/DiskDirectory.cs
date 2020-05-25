@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NFile.Util;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,14 +42,18 @@ namespace NFile.Disk
 
         public IDirectory GetDirectory(string relativePath)
         {
-            var fullPath = System.IO.Path.Combine(this.Directory.FullName, relativePath);
+            var normal = PathUtils.Normalize(relativePath);
+            var plat = PathUtils.Platformize(normal);
+            var fullPath = System.IO.Path.Combine(this.Directory.FullName, plat);
             var directory = new DirectoryInfo(fullPath);
             return new DiskDirectory(this.Root, directory);
         }
 
         public IFile GetFile(string relativePath)
         {
-            var fullPath = System.IO.Path.Combine(this.Directory.FullName, relativePath);
+            var normal = PathUtils.Normalize(relativePath);
+            var plat = PathUtils.Platformize(normal);
+            var fullPath = System.IO.Path.Combine(this.Directory.FullName, plat);
             var file = new FileInfo(fullPath);
             return new DiskFile(this.Root, file);
         }

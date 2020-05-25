@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NFile.Util;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,8 +22,8 @@ namespace NFile.Memory
 
         public IDirectory GetDirectory(string relativePath)
         {
-            var treated = relativePath.Trim(System.IO.Path.DirectorySeparatorChar);
-            var pieces = treated.Split(System.IO.Path.DirectorySeparatorChar);
+            var treated = PathUtils.Normalize(relativePath);
+            var pieces = PathUtils.Split(treated);
             var dirName = pieces.First();
 
             IDirectory child = null;
@@ -36,34 +37,34 @@ namespace NFile.Memory
             }
 
             child = child ?? new MemoryDirectory(this, dirName);
-            if (pieces.Length == 1)
+            if (pieces.Count() == 1)
             {
                 return child;
             }
 
-            var relative = System.IO.Path.Combine(pieces.Skip(1).ToArray());
+            var relative = PathUtils.Combine(pieces.Skip(1).ToArray());
             return child.GetDirectory(relative);
         }
 
         public IFile GetFile(string relativePath)
         {
-            var treated = relativePath.Trim(System.IO.Path.DirectorySeparatorChar);
-            var pieces = treated.Split(System.IO.Path.DirectorySeparatorChar);
-            if (pieces.Length == 1)
+            var treated = PathUtils.Normalize(relativePath);
+            var pieces = PathUtils.Split(treated);
+            if (pieces.Count() == 1)
             {
-                var fileName = pieces.First();
+                var fileName = PathUtils.GetName(treated);
                 if (this.Children.ContainsKey(fileName))
                 {
-                    var item = this.Children[pieces.First()];
+                    var item = this.Children[fileName];
                     if (item.ItemType == FileSystemItemType.File)
                     {
                         return item as MemoryFile;
                     }
                 }
-                return new MemoryFile(this, pieces.First());
+                return new MemoryFile(this, fileName);
             }
 
-            var relativeDir = System.IO.Path.Combine(pieces.SkipLast(1).ToArray());
+            var relativeDir = PathUtils.Combine(pieces.SkipLast(1).ToArray());
             var childDir = this.GetDirectory(relativeDir);
             return childDir.GetFile(pieces.Last());
         }

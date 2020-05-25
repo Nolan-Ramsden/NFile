@@ -1,21 +1,37 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NFile.Memory;
+using NFile.Azure.Blob;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NFile.Core.Tests
+namespace NFile.Azure.Tests
 {
     [TestClass]
-    public class MemoryFileSystemTests
+    public class AzureBlobFileSystemTests
     {
-        MemoryFileSystem Fs { get; } = new MemoryFileSystem(null);
+        IFileSystem Fs { get; } = new AzureBlobFileSystem(new AzureBlobConfiguration()
+        {
+            ConnectionString = "UseDevelopmentStorage=true",
+        });
+
+        IDirectory RootDirectory { get; }
+
+        public AzureBlobFileSystemTests()
+        {
+            this.RootDirectory = Fs.GetDirectory("testroot");
+        }
+
+        [TestInitialize]
+        public async Task Init()
+        {
+            await this.RootDirectory.Create();
+        }
 
         [TestMethod]
         public async Task CreateDirectory()
         {
-            var dir = this.Fs.GetDirectory(@"test_directory\");
+            var dir = this.RootDirectory.GetDirectory(@"test_directory\");
             Assert.AreEqual("test_directory", dir.Name);
-            Assert.AreEqual("test_directory", dir.Path);
+            Assert.AreEqual(@"testroot\test_directory", dir.Path);
 
             var exists = await dir.Exists();
             Assert.IsFalse(exists);
@@ -32,9 +48,9 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task CreateFile()
         {
-            var file = this.Fs.GetFile("test_file.txt");
+            var file = this.RootDirectory.GetFile("test_file.txt");
             Assert.AreEqual("test_file.txt", file.Name);
-            Assert.AreEqual("test_file.txt", file.Path);
+            Assert.AreEqual(@"testroot\test_file.txt", file.Path);
 
             var exists = await file.Exists();
             Assert.IsFalse(exists);
@@ -51,22 +67,22 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task CreateFileInSubdir()
         {
-            var dir1 = this.Fs.GetDirectory("dir1");
+            var dir1 = this.RootDirectory.GetDirectory("dir1");
             await dir1.Create();
 
             var dir2 = dir1.GetDirectory("dir2");
-            Assert.AreEqual(@"dir1\dir2", dir2.Path);
+            Assert.AreEqual(@"testroot\dir1\dir2", dir2.Path);
             await dir2.Create();
 
             var file = dir2.GetFile("test_file.txt");
-            Assert.AreEqual(@"dir1\dir2\test_file.txt", file.Path);
+            Assert.AreEqual(@"testroot\dir1\dir2\test_file.txt", file.Path);
             await file.Create();
 
-            var dir2FromRoot = this.Fs.GetDirectory(@"dir1\dir2");
+            var dir2FromRoot = this.RootDirectory.GetDirectory(@"dir1\dir2");
             var dir2Exists = await dir2FromRoot.Exists();
             Assert.IsTrue(dir2Exists);
 
-            var fileFromRoot = this.Fs.GetFile(@"dir1\dir2\test_file.txt");
+            var fileFromRoot = this.RootDirectory.GetFile(@"dir1\dir2\test_file.txt");
             var fileExists = await fileFromRoot.Exists();
             Assert.IsTrue(fileExists);
         }
@@ -74,7 +90,7 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task DeleteDirectoryWithItems()
         {
-            var dir1 = this.Fs.GetDirectory("dir1");
+            var dir1 = this.RootDirectory.GetDirectory("dir1");
             await dir1.Create();
 
             var dir2 = dir1.GetDirectory("dir2");
@@ -98,7 +114,7 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task EnumerateChildren()
         {
-            var dir1 = this.Fs.GetDirectory("dir1");
+            var dir1 = this.RootDirectory.GetDirectory("dir1");
             await dir1.Create();
 
             var dir2 = dir1.GetDirectory("dir2");
@@ -120,7 +136,7 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task WriteReadFile()
         {
-            var file = this.Fs.GetFile("test_file.txt");
+            var file = this.RootDirectory.GetFile("test_file.txt");
             await file.Create();
 
             using (var handle = file.Open())
@@ -150,20 +166,20 @@ namespace NFile.Core.Tests
         [TestMethod]
         public async Task IgnoresPlatform()
         {
-            var dirTrail = this.Fs.GetDirectory("testdir/");
+            var dirTrail = this.RootDirectory.GetDirectory("testdir/");
             await dirTrail.Create();
             var dirTrailExists = await dirTrail.Exists();
             Assert.IsTrue(dirTrailExists);
 
-            var dir = this.Fs.GetDirectory("testdir");
+            var dir = this.RootDirectory.GetDirectory("testdir");
             var dirExists = await dir.Exists();
             Assert.IsTrue(dirExists);
 
-            var dirTrail2 = this.Fs.GetDirectory(@"testdir\");
+            var dirTrail2 = this.RootDirectory.GetDirectory(@"testdir\");
             var dirTrail2Exists = await dirTrail2.Exists();
             Assert.IsTrue(dirTrail2Exists);
 
-            var dirLead = this.Fs.GetDirectory(@"\testdir");
+            var dirLead = this.RootDirectory.GetDirectory(@"\testdir");
             var dirLeadExists = await dirLead.Exists();
             Assert.IsTrue(dirLeadExists);
 
@@ -172,9 +188,15 @@ namespace NFile.Core.Tests
             var fileExists = await file.Exists();
             Assert.IsTrue(fileExists);
 
-            var fileMixed = this.Fs.GetFile(@"/testdir\test_file.txt");
+            var fileMixed = this.RootDirectory.GetFile(@"/testdir\test_file.txt");
             var fileMixedExists = await fileMixed.Exists();
             Assert.IsTrue(fileMixedExists);
+        }
+
+        [TestCleanup]
+        public async Task Cleanup()
+        {
+            await this.RootDirectory.Delete();
         }
     }
 }

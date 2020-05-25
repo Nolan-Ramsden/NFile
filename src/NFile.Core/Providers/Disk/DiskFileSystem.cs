@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using NFile.Util;
+using System.IO;
 
 namespace NFile.Disk
 {
@@ -17,13 +18,17 @@ namespace NFile.Disk
 
         public IDirectory GetDirectory(string path)
         {
-            var directory = new DirectoryInfo(Path.Combine(this.Root.FullName, path));
+            var normal = PathUtils.Normalize(path);
+            var plat = PathUtils.Platformize(normal);
+            var directory = new DirectoryInfo(Path.Combine(this.Root.FullName, plat));
             return new DiskDirectory(this.Root, directory);
         }
 
         public IFile GetFile(string path)
         {
-            var file = new FileInfo(Path.Combine(this.Root.FullName, path));
+            var normal = PathUtils.Normalize(path);
+            var plat = PathUtils.Platformize(normal);
+            var file = new FileInfo(Path.Combine(this.Root.FullName, plat));
             return new DiskFile(this.Root, file);
         }
     }

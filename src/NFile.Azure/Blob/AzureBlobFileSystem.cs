@@ -18,12 +18,12 @@ namespace NFile.Azure.Blob
 
         public IDirectory GetDirectory(string path)
         {
-            throw new NotImplementedException();
+            return new AzureBlobDirectory(this.Client, path);
         }
 
         public IFile GetFile(string path)
         {
-            throw new NotImplementedException();
+            return new AzureBlobFile(this.Client, path);
         }
     }
 }

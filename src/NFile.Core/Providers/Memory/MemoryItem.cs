@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NFile.Util;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace NFile.Memory
     {
         public abstract FileSystemItemType ItemType { get; }
         public string Name { get; }
-        public string Path => this.GetPath();
+        public string Path { get; }
         public string Provider => MemoryFileSystem.ProviderName;
 
         protected bool Created { get; set; }
@@ -16,8 +17,9 @@ namespace NFile.Memory
 
         public MemoryItem(MemoryDirectory parent, string name)
         {
-            this.Name = name;
             this.Parent = parent;
+            this.Name = PathUtils.GetName(name);
+            this.Path = PathUtils.Combine(parent?.Path ?? string.Empty, name);
         }
 
         public async Task Create()
@@ -52,13 +54,6 @@ namespace NFile.Memory
                 return this.Parent.Exists();
             }
             return Task.FromResult(true);
-        }
-
-        private string GetPath()
-        {
-            var parentPath = this.Parent?.Path ?? string.Empty;
-            var fullPath = System.IO.Path.Combine(parentPath, this.Name);
-            return fullPath.Trim(System.IO.Path.DirectorySeparatorChar);
         }
     }
 }

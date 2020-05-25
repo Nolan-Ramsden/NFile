@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NFile.Util;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace NFile.Disk
     abstract class DiskItem : IFileSystemItem
     {
         public abstract FileSystemItemType ItemType { get; }
-        public string Name => this.Item.Name;
+        public string Name => PathUtils.GetName(this.Path);
         public string Path => this.GetPath();
         public string Provider => DiskFileSystem.ProviderName;
 
@@ -34,8 +35,8 @@ namespace NFile.Disk
             {
                 throw new ArgumentException("Disk item root misconfigured");
             }
-            var relativePath = path.Substring(rootPath.Length, path.Length - rootPath.Length);
-            return relativePath.Trim(System.IO.Path.DirectorySeparatorChar);
+            var relativePath = System.IO.Path.GetRelativePath(rootPath, path);
+            return PathUtils.Normalize(relativePath);
         }
 
         public abstract Task Create();
